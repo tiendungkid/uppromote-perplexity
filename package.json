@@ -1,0 +1,23 @@
+{
+  "name": "uppromote-perplexity",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "collect.js": "^4.36.1",
+    "exceljs": "^4.3.0",
+    "prompts": "^2.4.2",
+    "puppeteer": "^21.1.1",
+    "puppeteer-core": "^21.1.1",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-adblocker": "^2.13.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "readline": "^1.3.0"
+  }
+}
