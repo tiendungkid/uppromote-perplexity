@@ -6,6 +6,7 @@ const agent = require('./useragent')
 const keywordExcel = require('./keyword')
 const {collect} = require("collect.js");
 const cookieHandler = require('./cookie')
+const getThread = require('./thread')
 
 puppeteer.use(AdblockerPlugin({blockTrackers: true}))
 puppeteer.use(StealthPlugin())
@@ -28,7 +29,10 @@ async function runPuppeteer() {
     if (!keywordExcelHandler) return
 
     const keywords = collect(keywordExcelHandler.keywords)
-    const detachedKeywords = keywords.chunk(1).toArray()
+
+    const { thread } = await getThread()
+
+    const detachedKeywords = keywords.chunk(thread).toArray()
 
     const spamFunction = async (item) => {
         const browser = await puppeteer.launch(options)

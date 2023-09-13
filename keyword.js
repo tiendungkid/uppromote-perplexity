@@ -64,8 +64,10 @@ const handler = {
 
         row.getCell('B').value = content
 
+        const keyword = row.getCell('A').value
+
         workbook.xlsx.writeFile(writeFileResultPath).then(() => {
-            console.log(`Saved result (keyword): ${content}`)
+            console.log(`Saved result (${keyword}): ${content}`)
         })
     }
 }
