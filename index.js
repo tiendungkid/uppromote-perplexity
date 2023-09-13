@@ -26,15 +26,16 @@ async function runPuppeteer() {
     if (!keywordExcelHandler) return
 
     const keywords = collect(keywordExcelHandler.keywords)
-    const detachedKeywords = keywords.chunk(10).all()
+    const detachedKeywords = keywords.chunk(5).toArray()
 
-    const spamFunction = (item) => {
-        return puppeteer.launch(options).then((browser) => doSpam(browser, item.keyword, {userAgent, cookie}))
+    const spamFunction = async (item) => {
+        const browser = await puppeteer.launch(options)
+        return doSpam(browser, item, {userAgent, cookie})
     }
 
-    detachedKeywords.map(async (kws) => {
-        await Promise.all(kws.map(spamFunction))
-    })
+    for (let keywordItem of detachedKeywords) {
+        await Promise.all(keywordItem.map(spamFunction))
+    }
 }
 
 async function prepareParams() {
@@ -44,7 +45,8 @@ async function prepareParams() {
     return {executePath, platform: pl, userAgent, cookie}
 }
 
-async function doSpam(browser, keyword, properties) {
+async function doSpam(browser, item, properties) {
+    let {keyword} = item
     const {userAgent, cookie} = properties
 
     const page = await browser.newPage()
@@ -76,7 +78,13 @@ async function doSpam(browser, keyword, properties) {
     for (let q of questions) {
         await page.type("textarea", q, {delay: 50})
         await page.keyboard.press('Enter');
-        await page.waitForNavigation({waitUntil: "networkidle2"});
+        
+        try {
+            await page.waitForNavigation({waitUntil: "networkidle2"});
+        } catch (e) {
+            return null
+        }
+
         await page.$eval('main', (node) => {
             node.scrollIntoView({behavior: 'smooth', block: 'end', inline: 'end'});
         });
@@ -84,7 +92,10 @@ async function doSpam(browser, keyword, properties) {
     }
     const url = page.url();
     await browser.close()
-    return url
+    return {
+        ...item,
+        result: url
+    }
 }
 
 (runPuppeteer)()
