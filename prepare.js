@@ -2,7 +2,7 @@ const prompts = require('prompts')
 
 module.exports = async function askForChromeExecutablePath() {
     const executablePaths = {
-        win: 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+        win: `C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe`,
         osx: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
         other: 'Input chrome executable path'
     }

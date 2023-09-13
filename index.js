@@ -6,6 +6,7 @@ const agent = require('./useragent')
 const getCookie = require('./request-cookie')
 const keywordExcel = require('./keyword')
 const {collect} = require("collect.js");
+const cookieHandler = require('./cookie')
 
 puppeteer.use(AdblockerPlugin({blockTrackers: true}))
 puppeteer.use(StealthPlugin())
@@ -13,11 +14,13 @@ puppeteer.use(StealthPlugin())
 
 async function runPuppeteer() {
 
+    const cookie = await (await cookieHandler()).toString()
+
     const {
         executePath,
-        userAgent,
-        cookie
+        userAgent
     } = await prepareParams()
+
     const options = {
         headless: false,
         executablePath: executePath,
@@ -41,8 +44,7 @@ async function runPuppeteer() {
 async function prepareParams() {
     const {executePath, platform: pl} = await platform()
     const userAgent = await agent(pl)
-    const {cookie} = await getCookie();
-    return {executePath, platform: pl, userAgent, cookie}
+    return {executePath, platform: pl, userAgent}
 }
 
 async function doSpam(browser, item, properties) {

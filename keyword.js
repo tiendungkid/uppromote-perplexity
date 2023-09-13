@@ -24,7 +24,7 @@ const handler = {
         const keywords = []
         sheet.eachRow((row, rowNumber) => {
             if (!row.getCell('A').value) return
-            if (row.getCell('B')) return
+            if (row.getCell('B').value) return
             keywords.push({
                 keyword: row.getCell('A').value,
                 row: rowNumber
