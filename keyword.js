@@ -1,4 +1,5 @@
 const ExcelJS = require('exceljs')
+const prompts = require('prompts')
 
 const handler = {
 
@@ -17,7 +18,22 @@ const handler = {
 
         if (!workbook) return
 
-        const sheet = workbook.getWorksheet(1)
+        const sheetsName = workbook.worksheets.map(s => ({
+            title: s.name,
+            value: s.name,
+            description: `Keyword from ${s.name}`
+        }))
+
+        const answerForSheetName = await prompts({
+            name: 'sheetName',
+            message: 'Select sheet',
+            type: 'select',
+            choices: sheetsName
+        })
+
+        const sheetName = answerForSheetName.sheetName
+
+        const sheet = workbook.getWorksheet(sheetName)
 
         console.log(`✔ Loaded ${sheet.rowCount} keywords`)
 
@@ -32,17 +48,18 @@ const handler = {
         })
         return {
             filePath: keywordFilePath,
-            keywords
+            keywords,
+            sheetName
         }
     },
 
-    writeResult: async (rowNumber, content) => {
-        const writeFileResultPath = './resources/result/keyword.xlsx'
+    writeResult: async (rowNumber, content, sheetName) => {
+        const writeFileResultPath = './resources/origin/keyword.xlsx'
         const W = new ExcelJS.Workbook
         const workbook = await W.xlsx.readFile(writeFileResultPath).catch(() => null)
         if (!workbook) return
 
-        const sheet = workbook.getWorksheet(1)
+        const sheet = workbook.getWorksheet(sheetName)
         const row = sheet.getRow(rowNumber)
 
         row.getCell('B').value = content

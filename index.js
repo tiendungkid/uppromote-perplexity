@@ -3,7 +3,6 @@ const StealthPlugin = require('puppeteer-extra-plugin-stealth')
 const AdblockerPlugin = require('puppeteer-extra-plugin-adblocker')
 const platform = require('./prepare')
 const agent = require('./useragent')
-const getCookie = require('./request-cookie')
 const keywordExcel = require('./keyword')
 const {collect} = require("collect.js");
 const cookieHandler = require('./cookie')
@@ -14,7 +13,7 @@ puppeteer.use(StealthPlugin())
 
 async function runPuppeteer() {
 
-    const cookie = await (await cookieHandler()).toString()
+    const cookie = (await cookieHandler()).toString()
 
     const {
         executePath,
@@ -29,7 +28,7 @@ async function runPuppeteer() {
     if (!keywordExcelHandler) return
 
     const keywords = collect(keywordExcelHandler.keywords)
-    const detachedKeywords = keywords.chunk(5).toArray()
+    const detachedKeywords = keywords.chunk(1).toArray()
 
     const spamFunction = async (item) => {
         const browser = await puppeteer.launch(options)
@@ -37,7 +36,17 @@ async function runPuppeteer() {
     }
 
     for (let keywordItem of detachedKeywords) {
-        await Promise.all(keywordItem.map(spamFunction))
+        const result = await Promise.all(keywordItem.map(spamFunction))
+
+        if (!result) return;
+
+        result.forEach(itemResult => {
+            keywordExcel.writeResult(
+                itemResult.row,
+                itemResult.result,
+                keywordExcelHandler.sheetName
+            )
+        })
     }
 }
 
@@ -57,7 +66,7 @@ async function doSpam(browser, item, properties) {
     await page.setViewport({width: 1366, height: 768})
     await page.goto('https://www.perplexity.ai/')
 
-    keyword = keyword.replace('affiliate program', '')
+    keyword = keyword.replace('affiliate program', '').trim()
     const questions = [
         `What is the {{name}} affiliate program?`,
         `What products can you promote?`,
@@ -80,7 +89,7 @@ async function doSpam(browser, item, properties) {
     for (let q of questions) {
         await page.type("textarea", q, {delay: 50})
         await page.keyboard.press('Enter');
-        
+
         try {
             await page.waitForNavigation({waitUntil: "networkidle2"});
         } catch (e) {
